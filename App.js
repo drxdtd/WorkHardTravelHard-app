@@ -73,7 +73,7 @@ export default function App() {
 
   const toDoKeyArray = Object.keys(toDos);
 
-  return !loading ? (
+  return loading ? (
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
@@ -117,10 +117,7 @@ export default function App() {
       </ScrollView>
     </View>
   ) : (
-    <View
-      style={{ ...styles.container, flex: 1, justifyContent: "center" }}
-      flex={1}
-    >
+    <View style={styles.container} justifyContent="center">
       <ActivityIndicator size={"large"} />
     </View>
   );
