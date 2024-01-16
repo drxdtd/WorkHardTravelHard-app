@@ -7,6 +7,7 @@ import {
   TextInput,
   ScrollView,
   Alert,
+  ActivityIndicator,
 } from "react-native";
 import { theme } from "./colors";
 import { useEffect, useState } from "react";
@@ -19,6 +20,7 @@ export default function App() {
   const [working, setWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     loadToDos();
   }, []);
@@ -26,7 +28,13 @@ export default function App() {
   const work = () => setWorking(true);
   const onChangeText = (payLoad) => setText(payLoad);
   const saveToDos = async (toSave) => {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+    const { load } = await AsyncStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify(toSave)
+    );
+    if (load) {
+      setLoading(false);
+    }
   };
   const loadToDos = async () => {
     const s = await AsyncStorage.getItem(STORAGE_KEY);
@@ -65,7 +73,7 @@ export default function App() {
 
   const toDoKeyArray = Object.keys(toDos);
 
-  return (
+  return !loading ? (
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
@@ -89,9 +97,9 @@ export default function App() {
       </View>
       <TextInput
         onSubmitEditing={addToDo}
+        onChangeText={onChangeText}
         value={text}
         returnKeyType="done"
-        onChangeText={onChangeText}
         placeholder={working ? "Add a To Do" : "Where do you want to go?"}
         style={styles.input}
       ></TextInput>
@@ -107,6 +115,13 @@ export default function App() {
           ) : null;
         })}
       </ScrollView>
+    </View>
+  ) : (
+    <View
+      style={{ ...styles.container, flex: 1, justifyContent: "center" }}
+      flex={1}
+    >
+      <ActivityIndicator size={"large"} />
     </View>
   );
 }
