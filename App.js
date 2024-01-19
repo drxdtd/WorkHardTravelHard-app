@@ -12,33 +12,47 @@ import {
 import { theme } from "./colors";
 import { useEffect, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Fontisto } from "@expo/vector-icons";
+import { Fontisto, AntDesign } from "@expo/vector-icons";
 
 const STORAGE_KEY = "@toDos";
+const MODE_KEY = "@mode";
 
 export default function App() {
-  const [working, setWorking] = useState(true);
+  const [isWorking, setIsWorking] = useState(true);
   const [text, setText] = useState("");
   const [toDos, setToDos] = useState({});
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     loadToDos();
+    loadMode();
   }, []);
-  const travel = () => setWorking(false);
-  const work = () => setWorking(true);
+
+  const setModeToTravel = async () => {
+    setIsWorking(false);
+    await AsyncStorage.setItem(MODE_KEY, "travel");
+  };
+  const setModeToWork = async () => {
+    setIsWorking(true);
+    await AsyncStorage.setItem(MODE_KEY, "work");
+  };
   const onChangeText = (payLoad) => setText(payLoad);
+
   const saveToDos = async (toSave) => {
-    const { load } = await AsyncStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify(toSave)
-    );
-    if (load) {
-      setLoading(false);
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  };
+
+  const loadMode = async () => {
+    const savedMode = await AsyncStorage.getItem(MODE_KEY);
+    if (savedMode !== null) {
+      setIsWorking(savedMode === "work");
     }
   };
+
   const loadToDos = async () => {
-    const s = await AsyncStorage.getItem(STORAGE_KEY);
-    setToDos(JSON.parse(s));
+    const localToDos = await AsyncStorage.getItem(STORAGE_KEY);
+    setToDos(JSON.parse(localToDos));
+    setLoading(false);
   };
 
   const addToDo = async () => {
@@ -47,7 +61,7 @@ export default function App() {
     }
     const newToDos = {
       ...toDos,
-      [Date.now()]: { text, working },
+      [Date.now()]: { text, working: isWorking, completed: false },
     };
     setToDos(newToDos);
     await saveToDos(newToDos);
@@ -70,25 +84,34 @@ export default function App() {
     ]);
     return;
   };
+  const completeToDo = async (key) => {
+    const newToDos = { ...toDos };
+    newToDos[key].completed = !newToDos[key].completed;
+    setToDos(newToDos);
+    await saveToDos(newToDos);
+  };
 
   const toDoKeyArray = Object.keys(toDos);
 
-  return loading ? (
+  return !loading ? (
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={work}>
+        <TouchableOpacity onPress={setModeToWork}>
           <Text
-            style={{ ...styles.btnText, color: working ? "white" : theme.grey }}
+            style={{
+              ...styles.btnText,
+              color: isWorking ? "white" : theme.grey,
+            }}
           >
             Work
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={travel}>
+        <TouchableOpacity onPress={setModeToTravel}>
           <Text
             style={{
               ...styles.btnText,
-              color: !working ? "white" : theme.grey,
+              color: !isWorking ? "white" : theme.grey,
             }}
           >
             Travel
@@ -100,16 +123,35 @@ export default function App() {
         onChangeText={onChangeText}
         value={text}
         returnKeyType="done"
-        placeholder={working ? "Add a To Do" : "Where do you want to go?"}
+        placeholder={isWorking ? "Add a To Do" : "Where do you want to go?"}
         style={styles.input}
       ></TextInput>
       <ScrollView>
         {toDoKeyArray.map((key) => {
-          return toDos[key].working === working ? (
+          const item = toDos[key];
+          return toDos[key].working === isWorking ? (
             <View style={styles.toDo} key={key}>
-              <Text style={styles.toDoText}> {toDos[key].text} </Text>
+              <Text
+                style={{
+                  ...styles.toDoText,
+                  textDecorationLine: item.completed ? "line-through" : "none",
+                }}
+              >
+                {toDos[key].text}
+              </Text>
+
               <TouchableOpacity onPress={() => deleteToDo(key)}>
                 <Fontisto name="trash" size={18} color="white" />
+              </TouchableOpacity>
+              <TouchableOpacity onPress={() => completeToDo(key)}>
+                <Fontisto
+                  name={`checkbox-${item.completed ? "active" : "passive"}`}
+                  size={24}
+                  color="white"
+                />
+              </TouchableOpacity>
+              <TouchableOpacity>
+                <AntDesign name="edit" size={24} color="white" />
               </TouchableOpacity>
             </View>
           ) : null;
@@ -133,6 +175,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     marginTop: 100,
     justifyContent: "space-between",
+    textDecorationLine: "line-through",
   },
   btnText: {
     fontSize: 38,
