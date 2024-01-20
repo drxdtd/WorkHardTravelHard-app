@@ -93,7 +93,11 @@ export default function App() {
 
   const toDoKeyArray = Object.keys(toDos);
 
-  return !loading ? (
+  return loading ? (
+    <View style={styles.container} justifyContent="center">
+      <ActivityIndicator size={"large"} />
+    </View>
+  ) : (
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
@@ -157,10 +161,6 @@ export default function App() {
           ) : null;
         })}
       </ScrollView>
-    </View>
-  ) : (
-    <View style={styles.container} justifyContent="center">
-      <ActivityIndicator size={"large"} />
     </View>
   );
 }
