@@ -29,17 +29,31 @@ export default function App() {
   }, []);
 
   const setModeToTravel = async () => {
+    // TODO: Delete
     setIsWorking(false);
     await AsyncStorage.setItem(MODE_KEY, "travel");
   };
   const setModeToWork = async () => {
+    // TODO: Delete
     setIsWorking(true);
     await AsyncStorage.setItem(MODE_KEY, "work");
   };
+
   const onChangeText = (payLoad) => setText(payLoad);
 
   const saveToDos = async (toSave) => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  };
+
+  // toa: mode를 인자로 받도록 만들었어요! {mode}에는 "work"나 "travel"이 들어갈거에요
+  const saveMode = async (mode) => {
+    // TODO Save the mode
+    //
+    // i think you can use saveModeToTravel function and saveModeToWork to save mode
+    // 제가 볼 땐 save mode to travel과 save mode to work는 같은 함수로 쓰는게 좋을 것 같아요!
+    //
+    // each function does the same thing!
+    // 두 함수는 하는 일이 같으니까요!
   };
 
   const loadMode = async () => {
