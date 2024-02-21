@@ -28,17 +28,6 @@ export default function App() {
     loadMode();
   }, []);
 
-  const setModeToTravel = async () => {
-    // TODO: Delete
-    setIsWorking(false);
-    await AsyncStorage.setItem(MODE_KEY, "travel");
-  };
-  const setModeToWork = async () => {
-    // TODO: Delete
-    setIsWorking(true);
-    await AsyncStorage.setItem(MODE_KEY, "work");
-  };
-
   const onChangeText = (payLoad) => setText(payLoad);
 
   const saveToDos = async (toSave) => {
