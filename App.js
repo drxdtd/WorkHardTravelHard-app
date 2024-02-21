@@ -34,7 +34,6 @@ export default function App() {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
   };
 
-  // toa: mode를 인자로 받도록 만들었어요! {mode}에는 "work"나 "travel"이 들어갈거에요
   const saveMode = async (mode) => {
     console.log(mode);
     if (mode === "work") {
