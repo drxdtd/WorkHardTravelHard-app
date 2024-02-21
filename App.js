@@ -24,22 +24,23 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadToDos();
-    loadMode();
+    load();
   }, []);
 
-  const setModeToTravel = async () => {
-    setIsWorking(false);
-    await AsyncStorage.setItem(MODE_KEY, "travel");
-  };
-  const setModeToWork = async () => {
-    setIsWorking(true);
-    await AsyncStorage.setItem(MODE_KEY, "work");
-  };
   const onChangeText = (payLoad) => setText(payLoad);
 
   const saveToDos = async (toSave) => {
     await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  };
+
+  const saveMode = async (mode) => {
+    console.log(mode);
+    if (mode === "work") {
+      setIsWorking(true);
+    } else {
+      setIsWorking(false);
+    }
+    await AsyncStorage.setItem(MODE_KEY, mode);
   };
 
   const loadMode = async () => {
@@ -51,7 +52,14 @@ export default function App() {
 
   const loadToDos = async () => {
     const localToDos = await AsyncStorage.getItem(STORAGE_KEY);
-    setToDos(JSON.parse(localToDos));
+    if (localToDos !== null) {
+      setToDos(JSON.parse(localToDos));
+    }
+  };
+
+  const load = async () => {
+    await loadMode();
+    await loadToDos();
     setLoading(false);
   };
 
@@ -101,7 +109,7 @@ export default function App() {
     <View style={styles.container}>
       <StatusBar style="light" />
       <View style={styles.header}>
-        <TouchableOpacity onPress={setModeToWork}>
+        <TouchableOpacity onPress={() => saveMode("work")}>
           <Text
             style={{
               ...styles.btnText,
@@ -111,7 +119,7 @@ export default function App() {
             Work
           </Text>
         </TouchableOpacity>
-        <TouchableOpacity onPress={setModeToTravel}>
+        <TouchableOpacity onPress={() => saveMode("travel")}>
           <Text
             style={{
               ...styles.btnText,
