@@ -24,8 +24,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    loadToDos();
-    loadMode();
+    load();
   }, []);
 
   const onChangeText = (payLoad) => setText(payLoad);
@@ -56,6 +55,11 @@ export default function App() {
     if (localToDos !== null) {
       setToDos(JSON.parse(localToDos));
     }
+  };
+
+  const load = async () => {
+    await loadMode();
+    await loadToDos();
     setLoading(false);
   };
 
